@@ -1,4 +1,4 @@
-FROM python:bookworm-slim
+FROM python:3.9-bookworm
 
 ENV SOURCE_DIR=/watchsrc
 ENV DESTINATION_DIR=/watchdst
