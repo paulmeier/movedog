@@ -6,4 +6,4 @@ WORKDIR /src
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "./app.py", "--source", "$SOURCE_DIR", "--destination", "$DESTINATION_DIR"]
+CMD ["python", "./app.py"]
