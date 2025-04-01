@@ -23,15 +23,29 @@ class DirectoryCreationHandler(FileSystemEventHandler):
         if self.debug:
             logger.debug(f"Event detected: {event}")
         if event.is_directory:
-            logger.info(f"New directory created: {event.src_path}")
-            dest_path = f"{self.destination}/{event.src_path.split('/')[-1]}"
+            # Wait 15 seconds to ensure the directory is fully created
+            logger.info(f"New directory detected: {event.src_path}. Waiting 15 seconds before processing...")
+            time.sleep(15)
+
+            # Check if the directory contains any files
+            if not any(os.path.isfile(os.path.join(event.src_path, f)) for f in os.listdir(event.src_path)):
+                logger.warning(f"Directory {event.src_path} is empty. Skipping copy.")
+                return
+
+            # Extract the lowest-level directory name
+            lowest_dir_name = os.path.basename(event.src_path)
+            dest_path = os.path.join(self.destination, lowest_dir_name)
+
+            logger.info(f"Copying only the lowest-level directory: {lowest_dir_name} to {dest_path}")
+
             try:
                 shutil.copytree(event.src_path, dest_path)
                 logger.info(f"Copied {event.src_path} to {dest_path}")
+            except FileExistsError:
+                logger.warning(f"Directory {dest_path} already exists. Skipping copy.")
             except Exception as e:
                 logger.error(f"Failed to copy {event.src_path} to {dest_path}: {e}")
-
-
+                
 def main():
     parser = argparse.ArgumentParser(
         description="Watch a directory for new subdirectory creation and copy it to a destination."
